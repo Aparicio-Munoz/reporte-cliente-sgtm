@@ -22,15 +22,28 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown(
-    """
+active_theme = getattr(st.context.theme, "type", None) or "light"
+if active_theme == "dark":
+    theme_fallbacks = {
+        "__SGTM_BG__": "#171A1D",
+        "__SGTM_PANEL__": "#222629",
+        "__SGTM_TEXT__": "#EEEAE2",
+    }
+else:
+    theme_fallbacks = {
+        "__SGTM_BG__": "#F8F7F2",
+        "__SGTM_PANEL__": "#F0EEE7",
+        "__SGTM_TEXT__": "#29312C",
+    }
+
+dashboard_css = """
     <style>
     .stApp {
         --sgtm-gold: #A98242;
         --sgtm-jade: #658572;
-        --sgtm-bg: var(--background-color, #F8F7F2);
-        --sgtm-panel: var(--secondary-background-color, #F0EEE7);
-        --sgtm-ink: var(--text-color, #29312C);
+        --sgtm-bg: var(--st-background-color, var(--background-color, __SGTM_BG__));
+        --sgtm-panel: var(--st-secondary-background-color, var(--secondary-background-color, __SGTM_PANEL__));
+        --sgtm-ink: var(--st-text-color, var(--text-color, __SGTM_TEXT__));
         --sgtm-muted: color-mix(in srgb, var(--sgtm-ink) 68%, var(--sgtm-bg));
         --sgtm-line: color-mix(in srgb, var(--sgtm-ink) 18%, var(--sgtm-bg));
         --sgtm-soft-gold: color-mix(in srgb, var(--sgtm-gold) 13%, var(--sgtm-bg));
@@ -358,9 +371,11 @@ st.markdown(
         .demo-tag { display: none; }
     }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+"""
+for placeholder, value in theme_fallbacks.items():
+    dashboard_css = dashboard_css.replace(placeholder, value)
+
+st.markdown(dashboard_css, unsafe_allow_html=True)
 
 
 def escape_value(value) -> str:
