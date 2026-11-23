@@ -25,22 +25,23 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    :root {
+    .stApp {
         --sgtm-gold: #A98242;
         --sgtm-jade: #658572;
-        --sgtm-paper: #F7F5EF;
-        --sgtm-ink: #29312C;
-        --sgtm-muted: #69736B;
-        --sgtm-line: #E4E0D7;
-        --sgtm-graphite: #F6F4EF;
-        --sgtm-panel: #FFFFFF;
-    }
-
-    .stApp,
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #F8F7F2 0%, #F4F2EB 55%, #F7F6F1 100%);
+        --sgtm-bg: var(--background-color, #F8F7F2);
+        --sgtm-panel: var(--secondary-background-color, #F0EEE7);
+        --sgtm-ink: var(--text-color, #29312C);
+        --sgtm-muted: color-mix(in srgb, var(--sgtm-ink) 68%, var(--sgtm-bg));
+        --sgtm-line: color-mix(in srgb, var(--sgtm-ink) 18%, var(--sgtm-bg));
+        --sgtm-soft-gold: color-mix(in srgb, var(--sgtm-gold) 13%, var(--sgtm-bg));
+        background: var(--sgtm-bg);
         color: var(--sgtm-ink);
         font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    [data-testid="stAppViewContainer"] {
+        background: var(--sgtm-bg);
+        color: var(--sgtm-ink);
     }
 
     [data-testid="stHeader"] { background: transparent; }
@@ -52,33 +53,33 @@ st.markdown(
     }
 
     [data-testid="stSidebar"] {
-        background: #F0EEE7;
-        border-right: 1px solid #E4E0D7;
+        background: var(--sgtm-panel);
+        border-right: 1px solid var(--sgtm-line);
     }
 
-    [data-testid="stSidebar"] * { color: #354039; }
+    [data-testid="stSidebar"] * { color: var(--sgtm-ink); }
 
     [data-testid="stSidebar"] [data-baseweb="select"] > div,
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] textarea {
-        background: #FFFFFF !important;
-        color: #29312C !important;
-        border-color: #D9D5CB !important;
+        background: var(--sgtm-bg) !important;
+        color: var(--sgtm-ink) !important;
+        border-color: var(--sgtm-line) !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stFileUploader"] section {
-        background: #FAF9F5;
-        border: 1px solid #DDD9CF;
+        background: var(--sgtm-bg);
+        border: 1px solid var(--sgtm-line);
     }
 
     [data-baseweb="popover"], [role="listbox"] {
-        background: #FFFFFF !important;
-        color: #29312C !important;
-        border-color: #E1DDD4 !important;
+        background: var(--sgtm-panel) !important;
+        color: var(--sgtm-ink) !important;
+        border-color: var(--sgtm-line) !important;
     }
 
-    [role="option"] { color: #29312C !important; }
-    [role="option"]:hover { background: #F3F0E8 !important; }
+    [role="option"] { color: var(--sgtm-ink) !important; }
+    [role="option"]:hover { background: var(--sgtm-bg) !important; }
 
     h1, h2, h3 {
         color: var(--sgtm-ink);
@@ -101,9 +102,10 @@ st.markdown(
         height: 2.45rem;
         display: grid;
         place-items: center;
-        border: 1px solid #B79A62;
-        background: #F3EDDF;
-        color: #8F6F35;
+        border: 1px solid var(--sgtm-gold);
+        border-radius: 0.25rem;
+        background: var(--sgtm-soft-gold);
+        color: var(--sgtm-gold);
         font-family: Georgia, serif;
         font-size: 1.25rem;
         font-weight: 700;
@@ -124,17 +126,17 @@ st.markdown(
 
     .demo-tag {
         margin-left: 0;
-        border: 1px solid #E2D8C3;
+        border: 1px solid var(--sgtm-line);
         border-radius: 999px;
-        background: #F6F1E7;
+        background: var(--sgtm-soft-gold);
         padding: 0.38rem 0.7rem;
-        color: #866B39;
+        color: var(--sgtm-gold);
         font-size: 0.75rem;
         letter-spacing: 0.04em;
     }
 
     .page-title {
-        color: #29312C;
+        color: var(--sgtm-ink);
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(2.3rem, 4vw, 3.45rem);
         font-weight: 500;
@@ -155,16 +157,15 @@ st.markdown(
         justify-content: space-between;
         gap: 1.5rem;
         padding: 1.55rem 1.8rem;
-        background: rgba(255, 255, 255, 0.94);
-        border: 1px solid #E6E2D9;
-        border-top: 2px solid #B28C4C;
+        background: var(--sgtm-panel);
+        border: 1px solid var(--sgtm-line);
+        border-top: 2px solid var(--sgtm-gold);
         border-radius: 0.7rem;
-        box-shadow: 0 8px 24px rgba(52, 48, 38, 0.045);
         margin: 1.1rem 0 1rem;
     }
 
     .profile-label {
-        color: #8F6F35;
+        color: var(--sgtm-gold);
         font-size: 0.72rem;
         letter-spacing: 0.13em;
         text-transform: uppercase;
@@ -172,7 +173,7 @@ st.markdown(
     }
 
     .profile-name {
-        color: #29312C;
+        color: var(--sgtm-ink);
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(1.9rem, 3.2vw, 2.8rem);
         font-weight: 500;
@@ -185,12 +186,12 @@ st.markdown(
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem 1.3rem;
-        color: #667068;
+        color: var(--sgtm-muted);
         font-size: 0.88rem;
     }
 
     .profile-facts strong {
-        color: #313A34;
+        color: var(--sgtm-ink);
         font-weight: 700;
         margin-right: 0.25rem;
     }
@@ -204,12 +205,11 @@ st.markdown(
     .plate {
         min-width: 205px;
         padding: 0.8rem 1.15rem 0.9rem;
-        border: 2px solid #B59A67;
+        border: 2px solid var(--sgtm-gold);
         border-radius: 0.45rem;
-        background: #F0E6CE;
-        color: #30332E;
+        background: var(--sgtm-soft-gold);
+        color: var(--sgtm-ink);
         text-align: center;
-        box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.38);
     }
 
     .plate-label {
@@ -230,7 +230,7 @@ st.markdown(
     }
 
     .section-heading {
-        color: #303832;
+        color: var(--sgtm-ink);
         font-family: Georgia, "Times New Roman", serif;
         font-size: 1.35rem;
         font-weight: 500;
@@ -245,21 +245,21 @@ st.markdown(
     }
 
     .sidebar-heading {
-        color: #8F6F35;
+        color: var(--sgtm-gold);
         font-family: Georgia, "Times New Roman", serif;
         font-size: 1.3rem;
         margin: 0.45rem 0 0.15rem;
     }
 
     .sidebar-copy {
-        color: #68736B;
+        color: var(--sgtm-muted);
         font-size: 0.82rem;
         line-height: 1.45;
         margin-bottom: 1.1rem;
     }
 
     .mini-label {
-        color: #737C74;
+        color: var(--sgtm-muted);
         font-size: 0.72rem;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -273,62 +273,62 @@ st.markdown(
     }
 
     div[data-testid="stMetric"] {
-        background: #FFFFFF;
-        border: 1px solid #E7E3DA;
-        border-top: 2px solid #BEA46E;
+        background: var(--sgtm-panel);
+        border: 1px solid var(--sgtm-line);
+        border-top: 2px solid var(--sgtm-gold);
         border-radius: 0.65rem;
-        box-shadow: 0 5px 18px rgba(52, 48, 38, 0.035);
         padding: 0.8rem 0.9rem 0.55rem;
         min-height: 98px;
     }
 
     div[data-testid="stMetric"] label {
-        color: #6E786F !important;
+        color: var(--sgtm-muted) !important;
         font-size: 0.76rem !important;
         font-weight: 650 !important;
     }
 
     div[data-testid="stMetricValue"] {
-        color: #765B2C !important;
+        color: var(--sgtm-gold) !important;
         font-family: "Avenir Next", "Segoe UI", sans-serif;
         font-size: 1.45rem !important;
         font-weight: 700;
     }
 
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid #E5E1D8;
+        background: var(--sgtm-panel);
+        border: 1px solid var(--sgtm-line);
         border-radius: 0.7rem;
-        box-shadow: 0 7px 22px rgba(52, 48, 38, 0.035);
     }
 
     [data-testid="stDataFrame"] {
-        border: 1px solid #E2DED5;
+        border: 1px solid var(--sgtm-line);
         border-radius: 0.45rem;
     }
 
     .maintenance-callout {
         border-left: 3px solid var(--sgtm-jade);
         border-radius: 0 0.45rem 0.45rem 0;
-        background: #F0F5F0;
+        background: color-mix(in srgb, var(--sgtm-jade) 14%, var(--sgtm-bg));
         padding: 1rem 1.1rem;
         margin: 0.5rem 0;
     }
 
-    .maintenance-callout strong { color: #496B57; }
+    .maintenance-callout strong {
+        color: color-mix(in srgb, var(--sgtm-jade) 70%, var(--sgtm-ink));
+    }
 
     .demo-footnote {
-        color: #788078;
+        color: var(--sgtm-muted);
         font-size: 0.76rem;
         margin-top: 1.1rem;
         padding-top: 0.8rem;
-        border-top: 1px solid #E4E0D7;
+        border-top: 1px solid var(--sgtm-line);
     }
 
     .stButton button, .stDownloadButton button {
-        background: #A98242 !important;
-        border: 1px solid #A98242 !important;
-        color: #FFFFFF !important;
+        background: var(--sgtm-gold) !important;
+        border: 1px solid var(--sgtm-gold) !important;
+        color: #232720 !important;
         font-weight: 750 !important;
         border-radius: 0.45rem !important;
     }
@@ -339,9 +339,9 @@ st.markdown(
     }
 
     [data-testid="stAlert"] {
-        background: #F0F4F7;
-        border: 1px solid #D9E3E9;
-        color: #344A58;
+        background: var(--sgtm-panel);
+        border: 1px solid var(--sgtm-line);
+        color: var(--sgtm-ink);
     }
 
     @media (max-width: 760px) {
@@ -596,15 +596,8 @@ with chart_column:
                 )
                 .properties(height=280)
                 .configure_view(strokeOpacity=0)
-                .configure_axis(
-                    labelColor="#69736B",
-                    gridColor="#E9E6DE",
-                    domainColor="#D6D2C8",
-                    tickColor="#D6D2C8",
-                )
-                .configure_legend(labelColor="#59635B")
             )
-            st.altair_chart(financial_chart, width="stretch", theme=None)
+            st.altair_chart(financial_chart, width="stretch")
 
 with status_column:
     with st.container(border=True):
@@ -623,7 +616,7 @@ with status_column:
             status_palette = [JADE, GOLD, "#B97869", "#8794A0", "#9C83A6"]
             status_chart = (
                 alt.Chart(status_summary)
-                .mark_arc(innerRadius=62, outerRadius=105, stroke="#FFFFFF", strokeWidth=3)
+                .mark_arc(innerRadius=62, outerRadius=105, strokeWidth=3)
                 .encode(
                     theta=alt.Theta("ordenes:Q", stack=True),
                     color=alt.Color(
@@ -639,9 +632,8 @@ with status_column:
                 )
                 .properties(height=280)
                 .configure_view(strokeOpacity=0)
-                .configure_legend(labelColor="#59635B")
             )
-            st.altair_chart(status_chart, width="stretch", theme=None)
+            st.altair_chart(status_chart, width="stretch")
 
 maintenance_column, cost_column = st.columns([1, 1], gap="large")
 
@@ -693,13 +685,8 @@ with cost_column:
                 )
                 .properties(height=145)
                 .configure_view(strokeOpacity=0)
-                .configure_axis(
-                    labelColor="#59635B",
-                    gridColor="#E9E6DE",
-                    domainColor="#D6D2C8",
-                )
             )
-            st.altair_chart(cost_chart, width="stretch", theme=None)
+            st.altair_chart(cost_chart, width="stretch")
 
 st.markdown("<br>", unsafe_allow_html=True)
 with st.container(border=True):
