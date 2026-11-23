@@ -22,39 +22,18 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-active_theme = getattr(st.context.theme, "type", None) or "light"
-if active_theme == "dark":
-    theme_fallbacks = {
-        "__SGTM_BG__": "#171A1D",
-        "__SGTM_PANEL__": "#222629",
-        "__SGTM_TEXT__": "#EEEAE2",
-    }
-else:
-    theme_fallbacks = {
-        "__SGTM_BG__": "#F8F7F2",
-        "__SGTM_PANEL__": "#F0EEE7",
-        "__SGTM_TEXT__": "#29312C",
-    }
-
 dashboard_css = """
     <style>
     .stApp {
         --sgtm-gold: #A98242;
         --sgtm-jade: #658572;
-        --sgtm-bg: var(--st-background-color, var(--background-color, __SGTM_BG__));
-        --sgtm-panel: var(--st-secondary-background-color, var(--secondary-background-color, __SGTM_PANEL__));
-        --sgtm-ink: var(--st-text-color, var(--text-color, __SGTM_TEXT__));
-        --sgtm-muted: color-mix(in srgb, var(--sgtm-ink) 68%, var(--sgtm-bg));
-        --sgtm-line: color-mix(in srgb, var(--sgtm-ink) 18%, var(--sgtm-bg));
-        --sgtm-soft-gold: color-mix(in srgb, var(--sgtm-gold) 13%, var(--sgtm-bg));
-        background: var(--sgtm-bg);
-        color: var(--sgtm-ink);
+        --sgtm-bg: transparent;
+        --sgtm-panel: transparent;
+        --sgtm-ink: currentColor;
+        --sgtm-muted: color-mix(in srgb, currentColor 68%, transparent);
+        --sgtm-line: color-mix(in srgb, currentColor 18%, transparent);
+        --sgtm-soft-gold: color-mix(in srgb, var(--sgtm-gold) 13%, transparent);
         font-family: "Avenir Next", "Segoe UI", sans-serif;
-    }
-
-    [data-testid="stAppViewContainer"] {
-        background: var(--sgtm-bg);
-        color: var(--sgtm-ink);
     }
 
     [data-testid="stHeader"] { background: transparent; }
@@ -66,7 +45,6 @@ dashboard_css = """
     }
 
     [data-testid="stSidebar"] {
-        background: var(--sgtm-panel);
         border-right: 1px solid var(--sgtm-line);
     }
 
@@ -75,27 +53,15 @@ dashboard_css = """
     [data-testid="stSidebar"] [data-baseweb="select"] > div,
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] textarea {
-        background: var(--sgtm-bg) !important;
-        color: var(--sgtm-ink) !important;
         border-color: var(--sgtm-line) !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stFileUploader"] section {
-        background: var(--sgtm-bg);
         border: 1px solid var(--sgtm-line);
     }
 
-    [data-baseweb="popover"], [role="listbox"] {
-        background: var(--sgtm-panel) !important;
-        color: var(--sgtm-ink) !important;
-        border-color: var(--sgtm-line) !important;
-    }
-
-    [role="option"] { color: var(--sgtm-ink) !important; }
-    [role="option"]:hover { background: var(--sgtm-bg) !important; }
-
     h1, h2, h3 {
-        color: var(--sgtm-ink);
+        color: inherit;
         font-family: "Avenir Next", "Segoe UI", sans-serif;
         letter-spacing: -0.025em;
     }
@@ -149,7 +115,7 @@ dashboard_css = """
     }
 
     .page-title {
-        color: var(--sgtm-ink);
+        color: inherit;
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(2.3rem, 4vw, 3.45rem);
         font-weight: 500;
@@ -170,7 +136,6 @@ dashboard_css = """
         justify-content: space-between;
         gap: 1.5rem;
         padding: 1.55rem 1.8rem;
-        background: var(--sgtm-panel);
         border: 1px solid var(--sgtm-line);
         border-top: 2px solid var(--sgtm-gold);
         border-radius: 0.7rem;
@@ -186,7 +151,7 @@ dashboard_css = """
     }
 
     .profile-name {
-        color: var(--sgtm-ink);
+        color: inherit;
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(1.9rem, 3.2vw, 2.8rem);
         font-weight: 500;
@@ -243,7 +208,7 @@ dashboard_css = """
     }
 
     .section-heading {
-        color: var(--sgtm-ink);
+        color: inherit;
         font-family: Georgia, "Times New Roman", serif;
         font-size: 1.35rem;
         font-weight: 500;
@@ -280,13 +245,12 @@ dashboard_css = """
     }
 
     .mini-value {
-        color: var(--sgtm-ink);
+        color: inherit;
         font-size: 1rem;
         font-weight: 650;
     }
 
     div[data-testid="stMetric"] {
-        background: var(--sgtm-panel);
         border: 1px solid var(--sgtm-line);
         border-top: 2px solid var(--sgtm-gold);
         border-radius: 0.65rem;
@@ -308,7 +272,6 @@ dashboard_css = """
     }
 
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: var(--sgtm-panel);
         border: 1px solid var(--sgtm-line);
         border-radius: 0.7rem;
     }
@@ -352,7 +315,6 @@ dashboard_css = """
     }
 
     [data-testid="stAlert"] {
-        background: var(--sgtm-panel);
         border: 1px solid var(--sgtm-line);
         color: var(--sgtm-ink);
     }
@@ -372,9 +334,6 @@ dashboard_css = """
     }
     </style>
 """
-for placeholder, value in theme_fallbacks.items():
-    dashboard_css = dashboard_css.replace(placeholder, value)
-
 st.markdown(dashboard_css, unsafe_allow_html=True)
 
 
