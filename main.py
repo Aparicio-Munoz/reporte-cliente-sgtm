@@ -1,4 +1,6 @@
 from html import escape
+import hashlib
+import io
 import json
 from pathlib import Path
 
@@ -363,15 +365,48 @@ def spanish_date(value) -> str:
     return f"{value.day} de {months[value.month - 1]} de {value.year}"
 
 
-def load_data() -> pd.DataFrame:
-    if not DATA_PATH.exists():
-        st.error("Falta datos_ficticios_sgtm.csv junto a main.py.")
+def load_data(uploaded_file=None) -> tuple[pd.DataFrame, dict, str, str]:
+    if uploaded_file is None:
+        if not DATA_PATH.exists():
+            st.error(
+                "Carga un archivo JSON o CSV en el panel lateral. "
+                f"Si no cargas uno, se buscará {DATA_PATH.name} junto a main.py."
+            )
+            st.stop()
+        file_name = DATA_PATH.name
+        file_bytes = DATA_PATH.read_bytes()
+    else:
+        file_name = uploaded_file.name
+        file_bytes = uploaded_file.getvalue()
+
+    preset_filters = {}
+    try:
+        if file_name.lower().endswith(".json"):
+            payload = json.loads(file_bytes.decode("utf-8-sig"))
+            if isinstance(payload, list):
+                records = payload
+            elif isinstance(payload, dict):
+                records = payload.get("registros")
+                preset_filters = payload.get("filtros", {})
+                if not isinstance(preset_filters, dict):
+                    preset_filters = {}
+            else:
+                raise ValueError("El JSON debe ser un objeto o una lista de registros.")
+
+            if not isinstance(records, list):
+                raise ValueError("No encontré una lista llamada 'registros' dentro del JSON.")
+            data = pd.json_normalize(records)
+        elif file_name.lower().endswith(".csv"):
+            data = pd.read_csv(
+                io.BytesIO(file_bytes),
+                dtype={"documento": str, "telefono": str, "placa": str},
+            )
+        else:
+            raise ValueError("El formato debe ser .json o .csv.")
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        st.error(f"No pude leer {file_name}: {error}")
         st.stop()
 
-    data = pd.read_csv(
-        DATA_PATH,
-        dtype={"documento": str, "telefono": str, "placa": str},
-    )
     data.columns = [normalize_column(column) for column in data.columns]
 
     required = {
@@ -382,12 +417,18 @@ def load_data() -> pd.DataFrame:
     }
     missing = required.difference(data.columns)
     if missing:
-        st.error("El CSV necesita estas columnas: " + ", ".join(sorted(missing)))
+        st.error(
+            "Al archivo le faltan columnas necesarias para este reporte: "
+            + ", ".join(sorted(missing))
+        )
         st.stop()
 
-    data["fecha"] = pd.to_datetime(data["fecha"], format="%Y-%m-%d", errors="coerce")
+    for column in ["cliente_id", "documento", "telefono", "placa"]:
+        data[column] = data[column].astype("string")
+
+    data["fecha"] = pd.to_datetime(data["fecha"], errors="coerce")
     data["proximo_servicio_fecha"] = pd.to_datetime(
-        data["proximo_servicio_fecha"], format="%Y-%m-%d", errors="coerce"
+        data["proximo_servicio_fecha"], errors="coerce"
     )
     numeric_columns = [
         "anio_moto", "cilindraje", "kilometraje", "mano_obra", "costo_repuestos",
@@ -397,11 +438,27 @@ def load_data() -> pd.DataFrame:
         data[column] = pd.to_numeric(data[column], errors="coerce").fillna(0)
 
     data = data.dropna(subset=["fecha", "cliente_id", "nombre"]).copy()
+    if data.empty:
+        st.error("El archivo no tiene registros válidos con fecha, cliente y nombre.")
+        st.stop()
     data["saldo"] = (data["valor"] - data["pagado"]).clip(lower=0)
-    return data
+    source_key = hashlib.sha256(file_bytes).hexdigest()[:12]
+    return data, preset_filters, source_key, file_name
 
 
-data = load_data()
+st.sidebar.markdown('<div class="sidebar-heading">Expediente</div>', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div class="sidebar-copy">Carga el JSON descargado o usa el CSV de ejemplo.</div>',
+    unsafe_allow_html=True,
+)
+uploaded_file = st.sidebar.file_uploader(
+    "Cargar datos del cliente",
+    type=["json", "csv"],
+    help="El JSON puede ser el informe exportado por SGTM, con una lista llamada 'registros'.",
+)
+data, import_filters, source_key, source_name = load_data(uploaded_file)
+st.sidebar.caption(f"Archivo activo: {source_name} · {len(data)} registros")
+
 clients = (
     data[["cliente_id", "nombre"]]
     .drop_duplicates(subset=["cliente_id"])
@@ -409,37 +466,61 @@ clients = (
 )
 client_names = dict(zip(clients["cliente_id"], clients["nombre"]))
 
-st.sidebar.markdown('<div class="sidebar-heading">Expediente</div>', unsafe_allow_html=True)
-st.sidebar.markdown(
-    '<div class="sidebar-copy">Explora el historial de servicio de un cliente.</div>',
-    unsafe_allow_html=True,
-)
-
+client_options = clients["cliente_id"].tolist()
+preferred_client = str(import_filters.get("cliente_id", ""))
+client_index = client_options.index(preferred_client) if preferred_client in client_options else 0
 selected_id = st.sidebar.selectbox(
     "Cliente",
-    options=clients["cliente_id"].tolist(),
+    options=client_options,
+    index=client_index,
     format_func=lambda client_id: client_names[client_id],
+    key=f"cliente_{source_key}",
 )
 
 client_data = data.loc[data["cliente_id"] == selected_id].copy().sort_values("fecha")
 min_date = client_data["fecha"].min().date()
 max_date = client_data["fecha"].max().date()
 
+def bounded_date(value, fallback):
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return fallback
+    return min(max(parsed.date(), min_date), max_date)
+
+
+preferred_start = bounded_date(import_filters.get("fecha_inicio"), min_date)
+preferred_end = bounded_date(import_filters.get("fecha_fin"), max_date)
+if preferred_start > preferred_end:
+    preferred_start, preferred_end = min_date, max_date
+
 date_range = st.sidebar.date_input(
     "Período de servicio",
-    value=(min_date, max_date),
+    value=(preferred_start, preferred_end),
     min_value=min_date,
     max_value=max_date,
     format="DD/MM/YYYY",
+    key=f"fechas_{source_key}",
 )
 
 states = sorted(client_data["estado"].dropna().unique().tolist())
+preferred_states = import_filters.get("estados", states)
+if not isinstance(preferred_states, list):
+    preferred_states = states
+preferred_states = [state for state in preferred_states if state in states] or states
 selected_states = st.sidebar.multiselect(
     "Estado de órdenes",
     options=states,
-    default=states,
+    default=preferred_states,
+    key=f"estados_{source_key}",
 )
-only_balance = st.sidebar.toggle("Mostrar solo con saldo pendiente", value=False)
+preferred_balance = import_filters.get("solo_saldos_pendientes", False)
+if not isinstance(preferred_balance, bool):
+    preferred_balance = False
+only_balance = st.sidebar.toggle(
+    "Mostrar solo con saldo pendiente",
+    value=preferred_balance,
+    key=f"saldo_pendiente_{source_key}",
+)
 st.sidebar.markdown("---")
 st.sidebar.caption("Demostración académica · todos los registros son ficticios")
 
