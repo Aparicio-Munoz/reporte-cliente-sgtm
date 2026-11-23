@@ -4,7 +4,16 @@ toolbarMode = "viewer"
 [theme]
 base = "light"
 primaryColor = "#A98242"
+font = "sans serif"
+
+[theme.light]
 backgroundColor = "#F8F7F2"
 secondaryBackgroundColor = "#F0EEE7"
 textColor = "#29312C"
-font = "sans serif"
+borderColor = "#E4E0D7"
+
+[theme.dark]
+backgroundColor = "#171A1D"
+secondaryBackgroundColor = "#222629"
+textColor = "#EEEAE2"
+borderColor = "#3B4144"
