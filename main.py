@@ -88,6 +88,7 @@ st.markdown(
 
     .brand-row {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 0.8rem;
         padding-bottom: 0.9rem;
@@ -122,7 +123,7 @@ st.markdown(
     }
 
     .demo-tag {
-        margin-left: auto;
+        margin-left: 0;
         border: 1px solid #E2D8C3;
         border-radius: 999px;
         background: #F6F1E7;
